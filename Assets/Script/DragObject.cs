@@ -72,6 +72,11 @@ public class DragObject : MonoBehaviour
 
             }
         }
+        //for (int i = 0; i < 100; i++) 
+        //{
+        //    this.gameObject.transform.position = new Vector3(0.01f*i, 0.01f * i, 0);
+
+        //}
         this.gameObject.transform.position = new Vector3(close_point.x, close_point.y, 0);
     }
 
@@ -159,6 +164,7 @@ public class DragObject : MonoBehaviour
         //for test
         for (int i = 0; i < 100; i++) { }
     }
+
     private void OnTriggerStay2D(Collider2D collision)
     {   // 마우스 버튼이 떼였고, 아직 플레이 된적 없으며, 현재 클릭되서 움직여지고 있는 오브젝트가 내 오브젝트랑 동일할때(컨트롤중인 오브젝트만 활성화하게)
         if (mouseButtonReleased && !is_once_played && object_name == GameObject.Find("dummy1").GetComponent<global_check>().current_controlling_object_name)
@@ -173,51 +179,54 @@ public class DragObject : MonoBehaviour
                 collobj = collision.gameObject;// 충돌한 오브젝트의 변수를 글로벌로 담는다.
                 is_merge = true;
             }
+
+
             if (collision_obj_name != my_object)
             {
                 Debug.Log("두 오브젝트가 다릅니다!!."+ my_object + collision_obj_name);
-                // 이제 여기부터 가장 가까운 그리드 서치해서 배치하는 함수 작성.
+
+                ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                // 이제 여기부터 가장 가까운 그리드 서치해서 배치하는 함수 작성.>>>>>>>>>>>>>>>>>>> 서치 알고리즘을 바꿔야합니다... 다시 작성해보기
+                List<List<bool>> is_Greed_full = GameObject.Find("dummy1").GetComponent<global_check>().is_Greed_full;
+                List<(int row, int column)> empty_cell_list = new List<(int row, int column)>();
+                for (int row_num = 0; row_num < 7; row_num++)
+                {
+                    for (int col_num = 0; col_num < 8; col_num++)
+                    {
+                        if (!is_Greed_full[row_num][col_num]) 
+                        {
+                            empty_cell_list.Add((row_num, col_num));
+                        }
+                    }
+                }
+
+
+                Vector2 current_object_position = object_position;
+                Vector2 close_point = new Vector2(0.0f, 0.0f); // 가장 가까운- 이동할 점을 여기에 저장할거임
+                float short_distance = 100000.0f;// 충분히 큰 값으로 비교
+                float distance;
+
+                for (int count = 0; count < empty_cell_list.Count; count++) 
+                {
+                    int row = empty_cell_list[count].row;
+                    int column = empty_cell_list[count].column;
+                    distance = Mathf.Sqrt(Mathf.Pow(current_object_position.x - Greed[row][column].x, 2) + Mathf.Pow(current_object_position.y - Greed[row][column].y, 2));
+                    if (distance < short_distance)
+                    {
+                        short_distance = distance; // 스캔한 것들 중 가장 작은 거리 값
+                        close_point.x = Greed[row][column].x; close_point.y = Greed[row][column].y;
+                    }
+                }
+                this.gameObject.transform.position = new Vector3(close_point.x, close_point.y, 0);
+                // 이제 여기부터 가장 가까운 그리드 서치해서 배치하는 함수 작성.>>>>>>>>>>>>>>>>>>> 서치 알고리즘을 바꿔야합니다... 다시 작성해보기
+                ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
             }
             is_once_played = true;
 
         }
-        //if (mouseButtonReleased && !is_once_played && object_name == GameObject.Find("dummy1").GetComponent<global_check>().current_controlling_object_name)
-        //{
-        //    string collision_obj_name = collision.gameObject.name.Substring(0, 2);
-        //    string my_object = this.gameObject.name.Substring(0, 2);
 
-        //    collobj = collision.gameObject;// 충돌한 오브젝트의 변수를 글로벌로 담는다.
-        //    is_merge = true;
-        //    //////////////////////////////////pop_and_merge 함수로 이동///////////////////////////
-        //    //////////////////////////////////pop_and_merge 함수로 이동///////////////////////////
-
-        //    //int collision_obj_tier = int.Parse( collision.gameObject.name.Substring(1, 1));
-        //    //int my_object_tier = int.Parse(this.gameObject.name.Substring(1, 1));
-
-        //    ////Debug.LogFormat("오브젝트가 겹쳐져 있습니다. 겹쳐진 오브젝트 이름은 '{0}' 입니다.", collision_obj_name);
-        //    ////Debug.LogFormat("컨트롤하고 있는 오브젝트 이름은 '{0}' 입니다.", my_object);
-        //    //if (collision_obj_name == my_object) 
-        //    //{
-        //    //    Vector2 current_pos = new Vector2(this.gameObject.transform.position.x, this.gameObject.transform.position.y);
-        //    //    string load_tier = "t" + (collision_obj_tier +1).ToString() +"_";
-        //    //    Debug.LogFormat("두 티어가 같습니다. 머지합니다.머지되는 티어:{0}", load_tier);
-
-
-
-
-
-        //    //    //델타 타임 이용해서 스케일을 0으로 만드는 게 필요함>> 얘는 스크립트를 따로 짜서 작성해야할 거 같음.
-        //    //    //Instantiate(Resources.Load(load_tier), current_pos, Quaternion.identity);
-
-        //    //    //Destroy(collision.gameObject);
-        //    //    //Destroy(this.gameObject);
-
-        //    //}
-        //    //////////////////////////////////pop_and_merge 함수로 이동///////////////////////////
-        //    is_once_played = true;
-
-        //}
 
     }
     string get_tier_name_number(string obj_name)
@@ -314,4 +323,5 @@ public class DragObject : MonoBehaviour
 }
 
 //해야할거
+// 옆으로 이동할 때 델타 타임 줘서 이동시키는거? 이거 어케해야함????
 //머지 안될때 오브젝트 옆으로 빼는거
