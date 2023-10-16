@@ -16,7 +16,7 @@ public class global_check : MonoBehaviour
     Text print_msg;
 
     RaycastHit hit;
-    List<List<(float x, float y)>> Greed = new List<List<(float x, float y)>>();
+    public List<List<(float x, float y)>> Greed = new List<List<(float x, float y)>>();
     public List<List<bool>> is_Greed_full = new List<List<bool>>();
 
 

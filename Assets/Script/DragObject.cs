@@ -159,12 +159,41 @@ public class DragObject : MonoBehaviour
         }
     }
     //처음 로드될 때의 나타나는 방식을 표현...
-    void first_appearance()
-    {
-        //for test
-        for (int i = 0; i < 100; i++) { }
-    }
 
+    public Vector3 find_empty_short_distance_cell(Vector3 obj_position) 
+    {
+        List<List<bool>> is_Greed_full = GameObject.Find("dummy1").GetComponent<global_check>().is_Greed_full;
+        List<(int row, int column)> empty_cell_list = new List<(int row, int column)>();
+        for (int row_num = 0; row_num < 7; row_num++)
+        {
+            for (int col_num = 0; col_num < 8; col_num++)
+            {
+                if (!is_Greed_full[row_num][col_num])
+                {
+                    empty_cell_list.Add((row_num, col_num));
+                }
+            }
+        }
+
+
+        Vector3 current_object_position = obj_position;
+        Vector3 close_point = new Vector3(0.0f, 0.0f, 0.0f); // 가장 가까운- 이동할 점을 여기에 저장할거임
+        float short_distance = 100000.0f;// 충분히 큰 값으로 비교
+        float distance;
+
+        for (int count = 0; count < empty_cell_list.Count; count++)
+        {
+            int row = empty_cell_list[count].row;
+            int column = empty_cell_list[count].column;
+            distance = Mathf.Sqrt(Mathf.Pow(current_object_position.x - Greed[row][column].x, 2) + Mathf.Pow(current_object_position.y - Greed[row][column].y, 2));
+            if (distance < short_distance)
+            {
+                short_distance = distance; // 스캔한 것들 중 가장 작은 거리 값
+                close_point.x = Greed[row][column].x; close_point.y = Greed[row][column].y;
+            }
+        }
+        return close_point;
+    }
     private void OnTriggerStay2D(Collider2D collision)
     {   // 마우스 버튼이 떼였고, 아직 플레이 된적 없으며, 현재 클릭되서 움직여지고 있는 오브젝트가 내 오브젝트랑 동일할때(컨트롤중인 오브젝트만 활성화하게)
         if (mouseButtonReleased && !is_once_played && object_name == GameObject.Find("dummy1").GetComponent<global_check>().current_controlling_object_name)
@@ -229,7 +258,7 @@ public class DragObject : MonoBehaviour
 
 
     }
-    string get_tier_name_number(string obj_name)
+    public string get_tier_name_number(string obj_name)
     {
         //입력된 현재 카테고리와 티어를 입력하면 그 카테고리와 티어 중 비어있는 n번째 파일 이름을 벹어냄
 
