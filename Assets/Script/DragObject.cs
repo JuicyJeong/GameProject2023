@@ -16,9 +16,11 @@ public class DragObject : MonoBehaviour
     bool mouseButtonReleased = false;
     bool is_once_played = false;
     bool is_merge = false;
+    bool is_play_first;
+    
     public Text print_msg1;
 
-    float defalut_obj_scale = 0.15f;
+    float defalut_obj_scale = 0.27f;
     
     float timer;
     float waitingTime = 0.0166667f;
@@ -141,7 +143,7 @@ public class DragObject : MonoBehaviour
 
                 if (defalut_obj_scale > 0.01)
                 {
-                    defalut_obj_scale = defalut_obj_scale - 0.005f;//  함수그래프로 크게 팝업 사이즈 나중에 조절해야함.
+                    defalut_obj_scale = defalut_obj_scale - 0.02f;//  함수그래프로 크게 팝업 사이즈 나중에 조절해야함.
                     this_obj.transform.localScale = new Vector3(defalut_obj_scale, defalut_obj_scale, 1);
                     coll_obj.transform.localScale = new Vector3(defalut_obj_scale, defalut_obj_scale, 1);
 
@@ -284,7 +286,7 @@ public class DragObject : MonoBehaviour
                 {
                     //Debug.LogFormat("배열에 입력될 인트 값: {0}", obj.name.Substring(6));
                     int input_num = int.Parse(obj.name.Substring(6));
-                    category_tier_number.Add(input_num);
+                    category_tier_number.Add(input_num); 
                 }
 
             }
@@ -318,6 +320,11 @@ public class DragObject : MonoBehaviour
         Greed_Initialize();
         thisobj = this.gameObject;
 
+        //모든 오브젝트는 처음 스케일 0에서 점점 커집니다. 그거 구현하기 전에 초기화
+        is_play_first = false; // 처음 생성될 때 사용하는(스케일 0에서 커지는거)
+        defalut_obj_scale = 0.0f;
+        this.gameObject.transform.localScale = new Vector3(defalut_obj_scale, defalut_obj_scale, defalut_obj_scale);
+
     }
     // Update is called once per frame
     void Update()
@@ -330,6 +337,23 @@ public class DragObject : MonoBehaviour
 
         if (timer > waitingTime) 
         {
+            //1. 오브젝트 처음 생성될때 팝업되게 생성하기.
+            if (!is_play_first) // 초기 스케일이 0에서부터 점점 커지는 효과를 갖게 만듭니다.
+            {
+                //컬라이더 꺼서 마우스로 못옮기게 하기
+                this.gameObject.GetComponent<BoxCollider2D>().enabled = false;
+                //scale up to linear
+                defalut_obj_scale = defalut_obj_scale + 0.02f;
+                this.gameObject.transform.localScale = new Vector3(defalut_obj_scale, defalut_obj_scale, defalut_obj_scale);
+                if (defalut_obj_scale >= 0.27) 
+                {
+                    is_play_first = true;
+                    this.gameObject.GetComponent<BoxCollider2D>().enabled = true;
+                    this.gameObject.transform.localScale = new Vector3(0.27f, 0.27f, 0.27f);//혹시 큰 수 더하다가 0.27 넘으면 안되니깐 여기서 잡아주기
+
+
+                }
+            }
 
             pop_and_merge(thisobj, collobj);
 
