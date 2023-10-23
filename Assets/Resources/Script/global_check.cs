@@ -29,7 +29,7 @@ public class global_check : MonoBehaviour
     {
         float start_x, start_y, greed_distance;
         //start_x = -6.0f; start_y = 5.0f; greed_distance = 2.0f;
-        start_x = -5.58f; start_y = 5.58f; greed_distance = 1.86f;
+        start_x = -5.58f; start_y = 3.72f; greed_distance = 1.86f;
 
         // 각 행에 대한 리스트를 생성하고 초기화
         for (int row_num = 0; row_num < 7; row_num++)
@@ -99,7 +99,7 @@ public class global_check : MonoBehaviour
     void Start()
     {
 
-        current_controlling_object_name = "init";
+        current_controlling_object_name = "initial_text";
         //print_msg = GameObject.Find("print_msg1").GetComponent<Text>();
 
         print_msg_TMP = GameObject.Find("print_msg2").GetComponent<TextMeshProUGUI>();
@@ -117,7 +117,9 @@ public class global_check : MonoBehaviour
     {
         timer += Time.deltaTime;
         //print_msg.text = "현재 컨트롤중인 오브젝트:" + current_controlling_object_name;
-        print_msg_TMP.text = "현재 컨트롤중인 오브젝트:" + current_controlling_object_name;
+        //print_msg_TMP.text = "현재 컨트롤중인 오브젝트:" + current_controlling_object_name;
+        print_msg_TMP.text = current_controlling_object_name + " 오브젝트에 대한 설명을 작성합니다.";
+
 
         check_cell_is_empty();
 

@@ -10,6 +10,7 @@ public class CreateObject : MonoBehaviour
     float waitingTime = 0.01667f;
 
     int press_counter = 0;
+    int create_delay_counter = 0;
     string object_name;
 
     Vector2 mousePosition;
@@ -18,6 +19,7 @@ public class CreateObject : MonoBehaviour
 
     bool mouseButtonReleased = false;
     bool is_once_played = false;
+    bool is_create_delay = false;
     //얘네둘은 글로벌 체크 스크립트에서 따옵니다.
     List<List<(float x, float y)>> Greed = new List<List<(float x, float y)>>();
     public List<List<bool>> is_Greed_full = new List<List<bool>>();
@@ -29,7 +31,7 @@ public class CreateObject : MonoBehaviour
     {
         press_counter = 0;
         mouseButtonReleased = false;
-
+        Debug.Log("누름");
     }
     private void OnMouseDrag()// 누르고 유지할 때
     {
@@ -40,6 +42,7 @@ public class CreateObject : MonoBehaviour
     {
         is_once_played = true;
         mouseButtonReleased = true;
+        Debug.Log("뗐음");
 
     }
     void object_create()
@@ -84,10 +87,23 @@ public class CreateObject : MonoBehaviour
             {
                 Debug.Log("드래그가 아닌 클릭으로 판정. 오브젝트를 생성합니다.");
                 object_create();
-
+                press_counter = 0;
                 is_once_played = false;
+                is_create_delay = true;
             }
 
+            if (is_create_delay)// 오브젝트 생성에 딜레이를 줍니다. 연속으로 생성하면 같은 공간에 오브젝트가 생성되서...
+            {
+                create_delay_counter++;
+                this.gameObject.GetComponent<BoxCollider2D>().enabled = false;// 딜레이 도는 동안 클릭 비활성화
+                if (create_delay_counter > 20) // 20프레임만큼 딜레이를 줄게요.
+                {
+                    create_delay_counter = 0;
+                    is_create_delay = false;
+                    this.gameObject.GetComponent<BoxCollider2D>().enabled = true;// 딜레이 끝나서 다시 활성화
+
+                }
+            }
 
 
 
