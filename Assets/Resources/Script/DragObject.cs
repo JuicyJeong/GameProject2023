@@ -214,19 +214,20 @@ public class DragObject : MonoBehaviour
             
             string collision_obj_name = collision.gameObject.name.Substring(0, 5);
             string my_object = this.gameObject.name.Substring(0, 5);
-            //int object_max_tier = object_tier["c0"];
-            //int current_object_tier = int.Parse(this.gameObject.name.Substring(4, 5));
-            if (collision_obj_name == my_object ) 
+            int object_max_tier = object_tier["c0"];
+            int current_object_tier = int.Parse(this.gameObject.name.Substring(4, 1));
+            if (collision_obj_name == my_object && current_object_tier < object_max_tier)// 합쳐져 있는 오브젝트랑 현재 오브젝트랑 같은 종류인가? AND 그 오브젝트들이 최고 티어가 아닌가?
             {
                 //Debug.Log("두 오브젝트가 동일합니다."+ my_object + collision_obj_name);
-                //Debug.LogFormat("이 오브젝트가 가질 수 있는 최대 티어: {0}\n클릭한 오브젝트의 현재티어: {1}", object_max_tier, current_object_tier);
+                //Debug.LogFormat("이 오브젝트가 가질 수 있는 최대 티어: {0}", object_max_tier);
+                //Debug.LogFormat("파싱 테스트: {0}",current_object_tier);
 
                 collobj = collision.gameObject;// 충돌한 오브젝트의 변수를 글로벌로 담는다.
                 is_merge = true;
             }
 
 
-            if (collision_obj_name != my_object)
+            else
             {
                 Debug.Log("두 오브젝트가 다릅니다!!."+ my_object + collision_obj_name);
 
