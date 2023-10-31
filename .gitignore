@@ -73,6 +73,7 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 #JINWOO'S REPO
+*.prefab
 *.ttf
 *.asset
 *.meta

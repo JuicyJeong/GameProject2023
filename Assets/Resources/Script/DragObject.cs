@@ -142,7 +142,7 @@ public class DragObject : MonoBehaviour
                 Vector2 current_pos = new Vector2(this_obj.transform.position.x, this_obj.transform.position.y);
                 //나중에 카테고리도 넣을 때 여기에다가 추가해서 넣어주세요.
 
-                string load_tier = "c" + my_object_categoey.ToString() + "_t" + (collision_obj_tier + 1).ToString() + "_";
+                string load_tier = "item_obj/c" + my_object_categoey.ToString() + "_t" + (collision_obj_tier + 1).ToString() + "_";
                 //Debug.LogFormat("두 티어가 같습니다. 머지합니다.머지되는 티어:{0}", load_tier);
 
                 //작게 사라지는 중에 오브젝트를 옮길 수가 있음. 사라질 때는 박스컬라이더를 끄기
