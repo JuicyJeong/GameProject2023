@@ -30,8 +30,16 @@ public class DragObject : MonoBehaviour
 
     Dictionary<string, int> object_tier = new Dictionary<string, int>() 
     {
-        { "c0", 5},
-        { "c1", 7}
+        { "c0", 5},  //////////// 테스트용 카테고리
+        { "c1", 7}, //파워
+        { "c2", 6}, // 램
+        { "c3", 7}, // 글카
+        { "c4", 7}, // 시퓨
+        { "c5", 3}, // 보드
+        { "c6", 5}, // 스스디
+        { "c7", 6} // 쿨러
+
+
     };
 
     GameObject thisobj;
@@ -135,7 +143,8 @@ public class DragObject : MonoBehaviour
             int collision_obj_tier = int.Parse(coll_obj.name.Substring(4, 1));
             int my_object_tier = int.Parse(this.gameObject.name.Substring(4, 1));
 
-            int my_object_categoey = 0; //나중에 변수 취급해서 카테고리별로 대응될 수 있도록 바꿔야 합니다.
+            //int my_object_categoey = 0; //나중에 변수 취급해서 카테고리별로 대응될 수 있도록 바꿔야 합니다.
+            int my_object_categoey = int.Parse(this.gameObject.name.Substring(1, 1)); ; //나중에 변수 취급해서 카테고리별로 대응될 수 있도록 바꿔야 합니다.
 
             if (collision_obj_name == my_object)
             {
@@ -208,13 +217,15 @@ public class DragObject : MonoBehaviour
     }
     private void OnTriggerStay2D(Collider2D collision)
     {   // 마우스 버튼이 떼였고, 아직 플레이 된적 없으며, 현재 클릭되서 움직여지고 있는 오브젝트가 내 오브젝트랑 동일할때(컨트롤중인 오브젝트만 활성화하게)
+
         if (mouseButtonReleased && !is_once_played && object_name == GameObject.Find("dummy1").GetComponent<global_check>().current_controlling_object_name)
         {
             
             
             string collision_obj_name = collision.gameObject.name.Substring(0, 5);
             string my_object = this.gameObject.name.Substring(0, 5);
-            int object_max_tier = object_tier["c0"];
+            string this_object_category_num = this.gameObject.name.Substring(0, 2);
+            int object_max_tier = object_tier[this_object_category_num];
             int current_object_tier = int.Parse(this.gameObject.name.Substring(4, 1));
             if (collision_obj_name == my_object && current_object_tier < object_max_tier)// 합쳐져 있는 오브젝트랑 현재 오브젝트랑 같은 종류인가? AND 그 오브젝트들이 최고 티어가 아닌가?
             {
