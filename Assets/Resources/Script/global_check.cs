@@ -6,6 +6,8 @@ using System;
 using System.Text;
 using static CSVReader;
 using TMPro;
+using System.IO;
+
 
 public class global_check : MonoBehaviour
 {
@@ -83,6 +85,9 @@ public class global_check : MonoBehaviour
                 if (hit.collider != null)
                 {
                     is_Greed_full[row_num][col_num] = true;
+                    string what_is_name  = hit.collider.gameObject.name;
+
+
                 }
                 else
                 {
@@ -92,6 +97,30 @@ public class global_check : MonoBehaviour
         }
 
 
+    }
+    public void SaveCSV()
+    {
+        string filePath = Application.dataPath + "/Table.csv";
+        StreamWriter outStream = System.IO.File.CreateText(filePath);
+
+        int rowCount = is_Greed_full.Count;
+        int colCount = is_Greed_full[0].Count;
+
+        for (int i = 0; i < colCount; i++)
+        {
+            string line = "";
+            for (int j = 0; j < rowCount; j++)
+            {
+                line += is_Greed_full[j][i];
+                if (j < rowCount - 1)
+                {
+                    line += ",";
+                }
+            }
+            outStream.WriteLine(line);
+        }
+
+        outStream.Close();
     }
 
 
@@ -132,7 +161,7 @@ public class global_check : MonoBehaviour
             if (Input.GetKey(KeyCode.C))
             {
                 Debug.Log("현재 오브젝트가 있는 셀은 다음과 같습니다.");
-
+                SaveCSV();
                 for (int row_num = 0; row_num < 7; row_num++)
                 {
                     for (int col_num = 0; col_num < 8; col_num++)
