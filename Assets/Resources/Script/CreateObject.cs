@@ -34,7 +34,7 @@ public class CreateObject : MonoBehaviour
     {
         press_counter = 0;
         mouseButtonReleased = false;
-        Debug.Log("누름");
+        //Debug.Log("누름");
     }
     private void OnMouseDrag()// 누르고 유지할 때
     {
@@ -45,7 +45,7 @@ public class CreateObject : MonoBehaviour
     {
         is_once_played = true;
         mouseButtonReleased = true;
-        Debug.Log("뗐음");
+        //Debug.Log("뗐음");
 
     }
     void object_create()
@@ -59,7 +59,7 @@ public class CreateObject : MonoBehaviour
         //string load_tier = "c0_t1_";
         string create_name = "item_obj/" + object_name + "1_";
         Vector3 create_pos = GameObject.Find("dummy1").GetComponent<DragObject>().find_empty_short_distance_cell(this.gameObject.transform.position);
-        Debug.Log("생성될 오브젝트의 위치:" + create_pos.x +create_pos.y);
+        //Debug.Log("생성될 오브젝트의 위치:" + create_pos.x +create_pos.y);
         Instantiate(Resources.Load(create_name), create_pos, Quaternion.identity);
 
     }
@@ -94,7 +94,7 @@ public class CreateObject : MonoBehaviour
 
             if (mouseButtonReleased && press_counter < 20 && is_once_played)
             {
-                Debug.Log("드래그가 아닌 클릭으로 판정. 오브젝트를 생성합니다.");
+                //Debug.Log("드래그가 아닌 클릭으로 판정. 오브젝트를 생성합니다.");
                 object_create();
                 press_counter = 0;
                 is_once_played = false;

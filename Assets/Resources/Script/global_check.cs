@@ -31,7 +31,7 @@ public class global_check : MonoBehaviour
     {
         float start_x, start_y, greed_distance;
         //start_x = -6.0f; start_y = 5.0f; greed_distance = 2.0f;
-        start_x = -5.58f; start_y = 3.72f; greed_distance = 1.86f;
+        start_x = -5.56f; start_y = 3.06f; greed_distance = 1.86f;
 
         // 각 행에 대한 리스트를 생성하고 초기화
         for (int row_num = 0; row_num < 7; row_num++)
