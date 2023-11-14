@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
@@ -18,7 +18,7 @@ public class DragObject : MonoBehaviour
     bool is_once_played = false;
     bool is_merge = false;
     bool is_play_first;
-
+    bool is_collision_box = false;
     public Text print_msg1;
 
     float defalut_obj_scale = 0.27f;
@@ -30,16 +30,14 @@ public class DragObject : MonoBehaviour
 
     Dictionary<string, int> object_tier = new Dictionary<string, int>() 
     {
-        { "c0", 5},  //////////// Å×½ºÆ®¿ë Ä«Å×°í¸®
-        { "c1", 7}, //ÆÄ¿ö
-        { "c2", 6}, // ·¥
-        { "c3", 7}, // ±ÛÄ«
-        { "c4", 7}, // ½ÃÇ»
-        { "c5", 3}, // º¸µå
-        { "c6", 5}, // ½º½ºµğ
-        { "c7", 6} // Äğ·¯
-
-
+        { "c0", 5},  //////////// í…ŒìŠ¤íŠ¸ìš© ì¹´í…Œê³ ë¦¬
+        { "c1", 7}, //íŒŒì›Œ
+        { "c2", 6}, // ë¨
+        { "c3", 7}, // ê¸€ì¹´
+        { "c4", 7}, // ì‹œí“¨
+        { "c5", 3}, // ë³´ë“œ
+        { "c6", 5}, // ìŠ¤ìŠ¤ë””
+        { "c7", 6} // ì¿¨ëŸ¬
     };
 
     GameObject thisobj;
@@ -47,9 +45,7 @@ public class DragObject : MonoBehaviour
     GameObject[] allObjects;
     TextMeshProUGUI print_msg_TMP;
 
-    // °¢ Çà¿¡ ´ëÇÑ ¸®½ºÆ®¸¦ »ı¼ºÇÏ°í ÃÊ±âÈ­
-
-
+    private AudioSource audioSource;
 
     void Greed_Initialize() // play onlt once
     {
@@ -57,14 +53,14 @@ public class DragObject : MonoBehaviour
         //start_x = -6.0f; start_y = 5.0f; greed_distance = 2.0f;
         start_x = -5.56f; start_y = 3.06f; greed_distance = 1.86f;
 
-        // °¢ Çà¿¡ ´ëÇÑ ¸®½ºÆ®¸¦ »ı¼ºÇÏ°í ÃÊ±âÈ­
+        // ê° í–‰ì— ëŒ€í•œ ë¦¬ìŠ¤íŠ¸ë¥¼ ìƒì„±í•˜ê³  ì´ˆê¸°í™”
         for (int row_num = 0; row_num < 7; row_num++)
         {
             List<(float x, float y)> row = new List<(float x, float y)>();
             for (int col_num = 0; col_num < 8; col_num++)
             {
-                // ¿øÇÏ´Â ÁÂÇ¥ (x, y)¸¦ ÇÒ´ç
-                //row.Add((i, j)); // ¿¹¸¦ µé¾î, °¢ ¿ø¼Ò´Â (i, j) ÁÂÇ¥¸¦ °¡Áü
+                // ì›í•˜ëŠ” ì¢Œí‘œ (x, y)ë¥¼ í• ë‹¹
+                //row.Add((i, j)); // ì˜ˆë¥¼ ë“¤ì–´, ê° ì›ì†ŒëŠ” (i, j) ì¢Œí‘œë¥¼ ê°€ì§
                 row.Add((start_x + (row_num * greed_distance), start_y - (col_num * greed_distance))); 
             }
             Greed.Add(row);
@@ -73,10 +69,10 @@ public class DragObject : MonoBehaviour
 
     void SNAP() 
     {
-        //ÇöÀç ¿ÀºêÁ§Æ®ÀÇ Æ÷Áö¼Ç ÀúÀå
+        //í˜„ì¬ ì˜¤ë¸Œì íŠ¸ì˜ í¬ì§€ì…˜ ì €ì¥
         Vector2 current_object_position = object_position;
-        Vector2 close_point = new Vector2(0.0f, 0.0f); // °¡Àå °¡±î¿î- ÀÌµ¿ÇÒ Á¡À» ¿©±â¿¡ ÀúÀåÇÒ°ÅÀÓ
-        float short_distance = 100000.0f;// ÃæºĞÈ÷ Å« °ªÀ¸·Î ºñ±³
+        Vector2 close_point = new Vector2(0.0f, 0.0f); // ê°€ì¥ ê°€ê¹Œìš´- ì´ë™í•  ì ì„ ì—¬ê¸°ì— ì €ì¥í• ê±°ì„
+        float short_distance = 100000.0f;// ì¶©ë¶„íˆ í° ê°’ìœ¼ë¡œ ë¹„êµ
         float distance;
         for (int i = 0; i < 7; i++)
         {
@@ -85,18 +81,14 @@ public class DragObject : MonoBehaviour
                 distance = Mathf.Sqrt(Mathf.Pow(current_object_position.x - Greed[i][j].x, 2) + Mathf.Pow(current_object_position.y - Greed[i][j].y, 2));
                 if (distance < short_distance)
                 {
-                    short_distance = distance; // ½ºÄµÇÑ °Íµé Áß °¡Àå ÀÛÀº °Å¸® °ª
+                    short_distance = distance; // ìŠ¤ìº”í•œ ê²ƒë“¤ ì¤‘ ê°€ì¥ ì‘ì€ ê±°ë¦¬ ê°’
                     close_point.x = Greed[i][j].x; close_point.y = Greed[i][j].y;
 
                 }
 
             }
         }
-        //for (int i = 0; i < 100; i++) 
-        //{
-        //    this.gameObject.transform.position = new Vector3(0.01f*i, 0.01f * i, 0);
 
-        //}
         this.gameObject.transform.position = new Vector3(close_point.x, close_point.y, 0);
     }
 
@@ -109,7 +101,7 @@ public class DragObject : MonoBehaviour
         is_once_played = false;
         GameObject.Find("dummy1").GetComponent<global_check>().current_controlling_object_name = object_name;
 
-        //print_msg1.text = "ÇöÀç ÄÁÆ®·ÑÁßÀÎ ¿ÀºêÁ§Æ®:" + current_control_object_name;
+        //print_msg1.text = "í˜„ì¬ ì»¨íŠ¸ë¡¤ì¤‘ì¸ ì˜¤ë¸Œì íŠ¸:" + current_control_object_name;
         offsetX = Camera.main.ScreenToWorldPoint(Input.mousePosition).x - transform.position.x;
         offsetY = Camera.main.ScreenToWorldPoint(Input.mousePosition).y - transform.position.y;
     }
@@ -123,9 +115,11 @@ public class DragObject : MonoBehaviour
 
     private void OnMouseUp()
     {
-        SNAP();
+        if (!is_collision_box)
+        {
+            SNAP();
+        }
 
-        //print_msg1.text = "ÇöÀç ¿ÀºêÁ§Æ®ÀÇ Æ÷Áö¼Ç: (" + this.gameObject.transform.position.x + ", " + this.gameObject.transform.position.y + ")";
         mouseButtonReleased = true;
 
     }
@@ -133,8 +127,7 @@ public class DragObject : MonoBehaviour
 
     void pop_and_merge(GameObject this_obj, GameObject coll_obj) 
     {
-        /*ÀÌ½´: 
-         */
+
         if (is_merge) 
         {
             string collision_obj_name = coll_obj.gameObject.name.Substring(0, 4);
@@ -143,18 +136,17 @@ public class DragObject : MonoBehaviour
             int collision_obj_tier = int.Parse(coll_obj.name.Substring(4, 1));
             int my_object_tier = int.Parse(this.gameObject.name.Substring(4, 1));
 
-            //int my_object_categoey = 0; //³ªÁß¿¡ º¯¼ö Ãë±ŞÇØ¼­ Ä«Å×°í¸®º°·Î ´ëÀÀµÉ ¼ö ÀÖµµ·Ï ¹Ù²ã¾ß ÇÕ´Ï´Ù.
-            int my_object_categoey = int.Parse(this.gameObject.name.Substring(1, 1)); ; //³ªÁß¿¡ º¯¼ö Ãë±ŞÇØ¼­ Ä«Å×°í¸®º°·Î ´ëÀÀµÉ ¼ö ÀÖµµ·Ï ¹Ù²ã¾ß ÇÕ´Ï´Ù.
+            int my_object_categoey = int.Parse(this.gameObject.name.Substring(1, 1)); //ë‚˜ì¤‘ì— ë³€ìˆ˜ ì·¨ê¸‰í•´ì„œ ì¹´í…Œê³ ë¦¬ë³„ë¡œ ëŒ€ì‘ë  ìˆ˜ ìˆë„ë¡ ë°”ê¿”ì•¼ í•©ë‹ˆë‹¤.
 
             if (collision_obj_name == my_object)
             {
                 Vector2 current_pos = new Vector2(this_obj.transform.position.x, this_obj.transform.position.y);
-                //³ªÁß¿¡ Ä«Å×°í¸®µµ ³ÖÀ» ¶§ ¿©±â¿¡´Ù°¡ Ãß°¡ÇØ¼­ ³Ö¾îÁÖ¼¼¿ä.
+                //ë‚˜ì¤‘ì— ì¹´í…Œê³ ë¦¬ë„ ë„£ì„ ë•Œ ì—¬ê¸°ì—ë‹¤ê°€ ì¶”ê°€í•´ì„œ ë„£ì–´ì£¼ì„¸ìš”.
 
                 string load_tier = "item_obj/c" + my_object_categoey.ToString() + "_t" + (collision_obj_tier + 1).ToString() + "_";
-                //Debug.LogFormat("µÎ Æ¼¾î°¡ °°½À´Ï´Ù. ¸ÓÁöÇÕ´Ï´Ù.¸ÓÁöµÇ´Â Æ¼¾î:{0}", load_tier);
+                //Debug.LogFormat("ë‘ í‹°ì–´ê°€ ê°™ìŠµë‹ˆë‹¤. ë¨¸ì§€í•©ë‹ˆë‹¤.ë¨¸ì§€ë˜ëŠ” í‹°ì–´:{0}", load_tier);
 
-                //ÀÛ°Ô »ç¶óÁö´Â Áß¿¡ ¿ÀºêÁ§Æ®¸¦ ¿Å±æ ¼ö°¡ ÀÖÀ½. »ç¶óÁú ¶§´Â ¹Ú½ºÄÃ¶óÀÌ´õ¸¦ ²ô±â
+                //ì‘ê²Œ ì‚¬ë¼ì§€ëŠ” ì¤‘ì— ì˜¤ë¸Œì íŠ¸ë¥¼ ì˜®ê¸¸ ìˆ˜ê°€ ìˆìŒ. ì‚¬ë¼ì§ˆ ë•ŒëŠ” ë°•ìŠ¤ì»¬ë¼ì´ë”ë¥¼ ë„ê¸°
                 this_obj.GetComponent<BoxCollider2D>().enabled = false;
                 coll_obj.GetComponent<BoxCollider2D>().enabled = false;
 
@@ -162,7 +154,7 @@ public class DragObject : MonoBehaviour
 
                 if (defalut_obj_scale > 0.01)
                 {
-                    defalut_obj_scale = defalut_obj_scale - 0.02f;//  ÇÔ¼ö±×·¡ÇÁ·Î Å©°Ô ÆË¾÷ »çÀÌÁî ³ªÁß¿¡ Á¶ÀıÇØ¾ßÇÔ.
+                    defalut_obj_scale = defalut_obj_scale - 0.025f;//  í•¨ìˆ˜ê·¸ë˜í”„ë¡œ í¬ê²Œ íŒì—… ì‚¬ì´ì¦ˆ ë‚˜ì¤‘ì— ì¡°ì ˆí•´ì•¼í•¨.
                     this_obj.transform.localScale = new Vector3(defalut_obj_scale, defalut_obj_scale, 1);
                     coll_obj.transform.localScale = new Vector3(defalut_obj_scale, defalut_obj_scale, 1);
 
@@ -179,7 +171,7 @@ public class DragObject : MonoBehaviour
             }
         }
     }
-    //Ã³À½ ·ÎµåµÉ ¶§ÀÇ ³ªÅ¸³ª´Â ¹æ½ÄÀ» Ç¥Çö...
+    //ì²˜ìŒ ë¡œë“œë  ë•Œì˜ ë‚˜íƒ€ë‚˜ëŠ” ë°©ì‹ì„ í‘œí˜„...
 
     public Vector3 find_empty_short_distance_cell(Vector3 obj_position) 
     {
@@ -198,8 +190,8 @@ public class DragObject : MonoBehaviour
 
 
         Vector3 current_object_position = obj_position;
-        Vector3 close_point = new Vector3(0.0f, 0.0f, 0.0f); // °¡Àå °¡±î¿î- ÀÌµ¿ÇÒ Á¡À» ¿©±â¿¡ ÀúÀåÇÒ°ÅÀÓ
-        float short_distance = 100000.0f;// ÃæºĞÈ÷ Å« °ªÀ¸·Î ºñ±³
+        Vector3 close_point = new Vector3(0.0f, 0.0f, 0.0f); // ê°€ì¥ ê°€ê¹Œìš´- ì´ë™í•  ì ì„ ì—¬ê¸°ì— ì €ì¥í• ê±°ì„
+        float short_distance = 100000.0f;// ì¶©ë¶„íˆ í° ê°’ìœ¼ë¡œ ë¹„êµ
         float distance;
 
         for (int count = 0; count < empty_cell_list.Count; count++)
@@ -209,14 +201,32 @@ public class DragObject : MonoBehaviour
             distance = Mathf.Sqrt(Mathf.Pow(current_object_position.x - Greed[row][column].x, 2) + Mathf.Pow(current_object_position.y - Greed[row][column].y, 2));
             if (distance < short_distance)
             {
-                short_distance = distance; // ½ºÄµÇÑ °Íµé Áß °¡Àå ÀÛÀº °Å¸® °ª
+                short_distance = distance; // ìŠ¤ìº”í•œ ê²ƒë“¤ ì¤‘ ê°€ì¥ ì‘ì€ ê±°ë¦¬ ê°’
                 close_point.x = Greed[row][column].x; close_point.y = Greed[row][column].y;
             }
         }
         return close_point;
     }
+
+    private void OnTriggerEnter2D(Collider2D collision) 
+    {
+        if (collision.gameObject.name == "Merge_item_Box") 
+        {
+            Debug.Log("ë°•ìŠ¤ë‘ ì¶©ëŒí•˜ì˜€ìŠµë‹ˆë‹¤.");
+            is_collision_box = true;
+        }
+    }
+    private void OnTriggerExit2D(Collider2D collision) 
+    {
+        if (collision.gameObject.name == "Merge_item_Box")
+        {
+            Debug.Log("ë°•ìŠ¤ë‘ ì¶©ëŒì´ ì¢…ë£Œë˜ì—ˆìŠµë‹ˆë‹¤..");
+            is_collision_box = false;
+
+        }
+    }
     private void OnTriggerStay2D(Collider2D collision)
-    {   // ¸¶¿ì½º ¹öÆ°ÀÌ ¶¼¿´°í, ¾ÆÁ÷ ÇÃ·¹ÀÌ µÈÀû ¾øÀ¸¸ç, ÇöÀç Å¬¸¯µÇ¼­ ¿òÁ÷¿©Áö°í ÀÖ´Â ¿ÀºêÁ§Æ®°¡ ³» ¿ÀºêÁ§Æ®¶û µ¿ÀÏÇÒ¶§(ÄÁÆ®·ÑÁßÀÎ ¿ÀºêÁ§Æ®¸¸ È°¼ºÈ­ÇÏ°Ô)
+    {   // ë§ˆìš°ìŠ¤ ë²„íŠ¼ì´ ë–¼ì˜€ê³ , ì•„ì§ í”Œë ˆì´ ëœì  ì—†ìœ¼ë©°, í˜„ì¬ í´ë¦­ë˜ì„œ ì›€ì§ì—¬ì§€ê³  ìˆëŠ” ì˜¤ë¸Œì íŠ¸ê°€ ë‚´ ì˜¤ë¸Œì íŠ¸ë‘ ë™ì¼í• ë•Œ(ì»¨íŠ¸ë¡¤ì¤‘ì¸ ì˜¤ë¸Œì íŠ¸ë§Œ í™œì„±í™”í•˜ê²Œ)
 
         if (mouseButtonReleased && !is_once_played && object_name == GameObject.Find("dummy1").GetComponent<global_check>().current_controlling_object_name)
         {
@@ -227,23 +237,23 @@ public class DragObject : MonoBehaviour
             string this_object_category_num = this.gameObject.name.Substring(0, 2);
             int object_max_tier = object_tier[this_object_category_num];
             int current_object_tier = int.Parse(this.gameObject.name.Substring(4, 1));
-            if (collision_obj_name == my_object && current_object_tier < object_max_tier)// ÇÕÃÄÁ® ÀÖ´Â ¿ÀºêÁ§Æ®¶û ÇöÀç ¿ÀºêÁ§Æ®¶û °°Àº Á¾·ùÀÎ°¡? AND ±× ¿ÀºêÁ§Æ®µéÀÌ ÃÖ°í Æ¼¾î°¡ ¾Æ´Ñ°¡?
+            if (collision_obj_name == my_object && current_object_tier < object_max_tier)// í•©ì³ì ¸ ìˆëŠ” ì˜¤ë¸Œì íŠ¸ë‘ í˜„ì¬ ì˜¤ë¸Œì íŠ¸ë‘ ê°™ì€ ì¢…ë¥˜ì¸ê°€? AND ê·¸ ì˜¤ë¸Œì íŠ¸ë“¤ì´ ìµœê³  í‹°ì–´ê°€ ì•„ë‹Œê°€?
             {
-                //Debug.Log("µÎ ¿ÀºêÁ§Æ®°¡ µ¿ÀÏÇÕ´Ï´Ù."+ my_object + collision_obj_name);
-                //Debug.LogFormat("ÀÌ ¿ÀºêÁ§Æ®°¡ °¡Áú ¼ö ÀÖ´Â ÃÖ´ë Æ¼¾î: {0}", object_max_tier);
-                //Debug.LogFormat("ÆÄ½Ì Å×½ºÆ®: {0}",current_object_tier);
+                //Debug.Log("ë‘ ì˜¤ë¸Œì íŠ¸ê°€ ë™ì¼í•©ë‹ˆë‹¤."+ my_object + collision_obj_name);
+                //Debug.LogFormat("ì´ ì˜¤ë¸Œì íŠ¸ê°€ ê°€ì§ˆ ìˆ˜ ìˆëŠ” ìµœëŒ€ í‹°ì–´: {0}", object_max_tier);
+                //Debug.LogFormat("íŒŒì‹± í…ŒìŠ¤íŠ¸: {0}",current_object_tier);
 
-                collobj = collision.gameObject;// Ãæµ¹ÇÑ ¿ÀºêÁ§Æ®ÀÇ º¯¼ö¸¦ ±Û·Î¹ú·Î ´ã´Â´Ù.
+                collobj = collision.gameObject;// ì¶©ëŒí•œ ì˜¤ë¸Œì íŠ¸ì˜ ë³€ìˆ˜ë¥¼ ê¸€ë¡œë²Œë¡œ ë‹´ëŠ”ë‹¤.
                 is_merge = true;
             }
 
 
             else
             {
-                Debug.Log("µÎ ¿ÀºêÁ§Æ®°¡ ´Ù¸¨´Ï´Ù!!."+ my_object + collision_obj_name);
+                Debug.Log("ë‘ ì˜¤ë¸Œì íŠ¸ê°€ ë‹¤ë¦…ë‹ˆë‹¤!!."+ my_object + collision_obj_name);
 
                 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                // ÀÌÁ¦ ¿©±âºÎÅÍ °¡Àå °¡±î¿î ±×¸®µå ¼­Ä¡ÇØ¼­ ¹èÄ¡ÇÏ´Â ÇÔ¼ö ÀÛ¼º.>>>>>>>>>>>>>>>>>>> ¼­Ä¡ ¾Ë°í¸®ÁòÀ» ¹Ù²ã¾ßÇÕ´Ï´Ù... ´Ù½Ã ÀÛ¼ºÇØº¸±â
+                // ì´ì œ ì—¬ê¸°ë¶€í„° ê°€ì¥ ê°€ê¹Œìš´ ê·¸ë¦¬ë“œ ì„œì¹˜í•´ì„œ ë°°ì¹˜í•˜ëŠ” í•¨ìˆ˜ ì‘ì„±.>>>>>>>>>>>>>>>>>>> ì„œì¹˜ ì•Œê³ ë¦¬ì¦˜ì„ ë°”ê¿”ì•¼í•©ë‹ˆë‹¤... ë‹¤ì‹œ ì‘ì„±í•´ë³´ê¸°
                 List<List<bool>> is_Greed_full = GameObject.Find("dummy1").GetComponent<global_check>().is_Greed_full;
                 List<(int row, int column)> empty_cell_list = new List<(int row, int column)>();
                 for (int row_num = 0; row_num < 7; row_num++)
@@ -259,8 +269,8 @@ public class DragObject : MonoBehaviour
 
 
                 Vector2 current_object_position = object_position;
-                Vector2 close_point = new Vector2(0.0f, 0.0f); // °¡Àå °¡±î¿î- ÀÌµ¿ÇÒ Á¡À» ¿©±â¿¡ ÀúÀåÇÒ°ÅÀÓ
-                float short_distance = 100000.0f;// ÃæºĞÈ÷ Å« °ªÀ¸·Î ºñ±³
+                Vector2 close_point = new Vector2(0.0f, 0.0f); // ê°€ì¥ ê°€ê¹Œìš´- ì´ë™í•  ì ì„ ì—¬ê¸°ì— ì €ì¥í• ê±°ì„
+                float short_distance = 100000.0f;// ì¶©ë¶„íˆ í° ê°’ìœ¼ë¡œ ë¹„êµ
                 float distance;
 
                 for (int count = 0; count < empty_cell_list.Count; count++) 
@@ -270,12 +280,12 @@ public class DragObject : MonoBehaviour
                     distance = Mathf.Sqrt(Mathf.Pow(current_object_position.x - Greed[row][column].x, 2) + Mathf.Pow(current_object_position.y - Greed[row][column].y, 2));
                     if (distance < short_distance)
                     {
-                        short_distance = distance; // ½ºÄµÇÑ °Íµé Áß °¡Àå ÀÛÀº °Å¸® °ª
+                        short_distance = distance; // ìŠ¤ìº”í•œ ê²ƒë“¤ ì¤‘ ê°€ì¥ ì‘ì€ ê±°ë¦¬ ê°’
                         close_point.x = Greed[row][column].x; close_point.y = Greed[row][column].y;
                     }
                 }
                 this.gameObject.transform.position = new Vector3(close_point.x, close_point.y, 0);
-                // ÀÌÁ¦ ¿©±âºÎÅÍ °¡Àå °¡±î¿î ±×¸®µå ¼­Ä¡ÇØ¼­ ¹èÄ¡ÇÏ´Â ÇÔ¼ö ÀÛ¼º.>>>>>>>>>>>>>>>>>>> ¼­Ä¡ ¾Ë°í¸®ÁòÀ» ¹Ù²ã¾ßÇÕ´Ï´Ù... ´Ù½Ã ÀÛ¼ºÇØº¸±â
+                // ì´ì œ ì—¬ê¸°ë¶€í„° ê°€ì¥ ê°€ê¹Œìš´ ê·¸ë¦¬ë“œ ì„œì¹˜í•´ì„œ ë°°ì¹˜í•˜ëŠ” í•¨ìˆ˜ ì‘ì„±.>>>>>>>>>>>>>>>>>>> ì„œì¹˜ ì•Œê³ ë¦¬ì¦˜ì„ ë°”ê¿”ì•¼í•©ë‹ˆë‹¤... ë‹¤ì‹œ ì‘ì„±í•´ë³´ê¸°
                 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -285,12 +295,23 @@ public class DragObject : MonoBehaviour
         }
 
 
+        if (mouseButtonReleased && collision.name == "Merge_item_Box")
+        {
+            //ê¸€ë¡œë²Œ boolë¡œ ë°•ìŠ¤ë‘ ì½œë¦¬ì „ì¸ì§€ ì•„ë‹Œì§€ í™•ì¸í•˜ê¸°
+            Debug.Log("ì•„ì´í…œì„ ì–´ì…ˆë¸”ë¦¬ë¡œ ì˜®ê¹ë‹ˆë‹¤.");
+            Destroy(thisobj);
+
+            //ì—¬ê¸°ì— ì–´ì…ˆë¸”ë¦¬ ì„¸ì´ë¸Œ ë°ì´í„°ë¡œ ì´ë™ì‹œí‚¤ëŠ” ìŠ¤í¬ë¦½íŠ¸ë¥¼ ì‘ì„±í•´ì•¼í•¨.
+
+            is_collision_box = false; //ì´ê±¸ë¡œ bool ë‹¤ì‹œ falseë¡œí•´ì„œ ì¤‘ë³µ ë°©ì§€
+        }
+
     }
     public string get_tier_name_number(string obj_name)
     {
-        //ÀÔ·ÂµÈ ÇöÀç Ä«Å×°í¸®¿Í Æ¼¾î¸¦ ÀÔ·ÂÇÏ¸é ±× Ä«Å×°í¸®¿Í Æ¼¾î Áß ºñ¾îÀÖ´Â n¹øÂ° ÆÄÀÏ ÀÌ¸§À» “Ê¾î³¿
+        //ì…ë ¥ëœ í˜„ì¬ ì¹´í…Œê³ ë¦¬ì™€ í‹°ì–´ë¥¼ ì…ë ¥í•˜ë©´ ê·¸ ì¹´í…Œê³ ë¦¬ì™€ í‹°ì–´ ì¤‘ ë¹„ì–´ìˆëŠ” në²ˆì§¸ íŒŒì¼ ì´ë¦„ì„ ë²¹ì–´ëƒ„
 
-        //±× Æ¼¾î¿¡ ÀÖ´Â Ä«Å×°í¸®ÀÇ ¹øÈ£¸¦ ÀúÀåÇÒ ¹è¿­
+        //ê·¸ í‹°ì–´ì— ìˆëŠ” ì¹´í…Œê³ ë¦¬ì˜ ë²ˆí˜¸ë¥¼ ì €ì¥í•  ë°°ì—´
         List<int> category_tier_number = new List<int>();
 
         //string search_obj = "c" + category_num.ToString() + "_t" + tier_num.ToString();
@@ -298,19 +319,19 @@ public class DragObject : MonoBehaviour
 
         string category_tier_str;
         string ret_number = "";
-        allObjects = FindObjectsOfType<GameObject>(); // ¾À¿¡ ÀÖ´Â ¸ğµç ¿ÀºêÁ§Æ®¸¦ ÀúÀåÇÔ
+        allObjects = FindObjectsOfType<GameObject>(); // ì”¬ì— ìˆëŠ” ëª¨ë“  ì˜¤ë¸Œì íŠ¸ë¥¼ ì €ì¥í•¨
         bool is_number_full = true;
 
         foreach (GameObject obj in allObjects)
         {
             category_tier_str = obj.name.Substring(0, 5);
 
-            if (category_tier_str == search_obj)//ÀÔ·ÂÇÑ Æ¼¾î¶û ±×°Å¶û °°À» °æ¿ì
+            if (category_tier_str == search_obj)//ì…ë ¥í•œ í‹°ì–´ë‘ ê·¸ê±°ë‘ ê°™ì„ ê²½ìš°
             {
-                //Debug.LogFormat("¾Õ¿¡ Ä«Å×°í¸®, Æ¼¾î°ª: {0} \n ºñ±³ÁßÀÎ °ª: {1}", category_tier_str, search_obj);
-                if (!obj.name.Contains("Clone")) //Å¬·ĞÀÌ¶ó´Â ½ºÆ®¸µÀÌ ¹è¿­¿¡ µé¾î°¡¸é ¾ÈµÇ´Ï±ñ ÇÑ¹ø Ã¼Å©
+                //Debug.LogFormat("ì•ì— ì¹´í…Œê³ ë¦¬, í‹°ì–´ê°’: {0} \n ë¹„êµì¤‘ì¸ ê°’: {1}", category_tier_str, search_obj);
+                if (!obj.name.Contains("Clone")) //í´ë¡ ì´ë¼ëŠ” ìŠ¤íŠ¸ë§ì´ ë°°ì—´ì— ë“¤ì–´ê°€ë©´ ì•ˆë˜ë‹ˆê¹ í•œë²ˆ ì²´í¬
                 {
-                    //Debug.LogFormat("¹è¿­¿¡ ÀÔ·ÂµÉ ÀÎÆ® °ª: {0}", obj.name.Substring(6));
+                    //Debug.LogFormat("ë°°ì—´ì— ì…ë ¥ë  ì¸íŠ¸ ê°’: {0}", obj.name.Substring(6));
                     int input_num = int.Parse(obj.name.Substring(6));
                     category_tier_number.Add(input_num); 
                 }
@@ -318,12 +339,12 @@ public class DragObject : MonoBehaviour
             }
         }
         string result = string.Join(",", category_tier_number);
-        //Debug.LogFormat("ÇöÀç ÇÒ´çµÈ ¹øÈ£µéÀº {0}.", result);
+        //Debug.LogFormat("í˜„ì¬ í• ë‹¹ëœ ë²ˆí˜¸ë“¤ì€ {0}.", result);
 
         int number_counter = 0;
         while (is_number_full)
         {
-            if (category_tier_number.Contains(number_counter))//»ı¼ºµÈ ¿ÀºêÁ§Æ® ¹øÈ£ Áß¿¡ Áßº¹ÀÌ¶ó¸é ++ÇÏ°í ´ÙÀ½ ¹øÈ£·Î
+            if (category_tier_number.Contains(number_counter))//ìƒì„±ëœ ì˜¤ë¸Œì íŠ¸ ë²ˆí˜¸ ì¤‘ì— ì¤‘ë³µì´ë¼ë©´ ++í•˜ê³  ë‹¤ìŒ ë²ˆí˜¸ë¡œ
             {
                 number_counter++;
             }
@@ -336,6 +357,8 @@ public class DragObject : MonoBehaviour
         return ret_number;
     }
 
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -346,8 +369,13 @@ public class DragObject : MonoBehaviour
         Greed_Initialize();
         thisobj = this.gameObject;
 
-        //¸ğµç ¿ÀºêÁ§Æ®´Â Ã³À½ ½ºÄÉÀÏ 0¿¡¼­ Á¡Á¡ Ä¿Áı´Ï´Ù. ±×°Å ±¸ÇöÇÏ±â Àü¿¡ ÃÊ±âÈ­
-        is_play_first = false; // Ã³À½ »ı¼ºµÉ ¶§ »ç¿ëÇÏ´Â(½ºÄÉÀÏ 0¿¡¼­ Ä¿Áö´Â°Å)
+        audioSource = gameObject.AddComponent<AudioSource>();
+        AudioClip audioClip = Resources.Load<AudioClip>("SoundEffect/news");
+        audioSource.clip = audioClip;
+        audioSource.Play();
+
+        //ëª¨ë“  ì˜¤ë¸Œì íŠ¸ëŠ” ì²˜ìŒ ìŠ¤ì¼€ì¼ 0ì—ì„œ ì ì  ì»¤ì§‘ë‹ˆë‹¤. ê·¸ê±° êµ¬í˜„í•˜ê¸° ì „ì— ì´ˆê¸°í™”
+        is_play_first = false; // ì²˜ìŒ ìƒì„±ë  ë•Œ ì‚¬ìš©í•˜ëŠ”(ìŠ¤ì¼€ì¼ 0ì—ì„œ ì»¤ì§€ëŠ”ê±°)
         defalut_obj_scale = 0.0f;
         this.gameObject.transform.localScale = new Vector3(defalut_obj_scale, defalut_obj_scale, defalut_obj_scale);
 
@@ -363,19 +391,19 @@ public class DragObject : MonoBehaviour
 
         if (timer > waitingTime) 
         {
-            //1. ¿ÀºêÁ§Æ® Ã³À½ »ı¼ºµÉ¶§ ÆË¾÷µÇ°Ô »ı¼ºÇÏ±â.
-            if (!is_play_first) // ÃÊ±â ½ºÄÉÀÏÀÌ 0¿¡¼­ºÎÅÍ Á¡Á¡ Ä¿Áö´Â È¿°ú¸¦ °®°Ô ¸¸µì´Ï´Ù.
+            //1. ì˜¤ë¸Œì íŠ¸ ì²˜ìŒ ìƒì„±ë ë•Œ íŒì—…ë˜ê²Œ ìƒì„±í•˜ê¸°.
+            if (!is_play_first) // ì´ˆê¸° ìŠ¤ì¼€ì¼ì´ 0ì—ì„œë¶€í„° ì ì  ì»¤ì§€ëŠ” íš¨ê³¼ë¥¼ ê°–ê²Œ ë§Œë“­ë‹ˆë‹¤.
             {
-                //ÄÃ¶óÀÌ´õ ²¨¼­ ¸¶¿ì½º·Î ¸ø¿Å±â°Ô ÇÏ±â
+                //ì»¬ë¼ì´ë” êº¼ì„œ ë§ˆìš°ìŠ¤ë¡œ ëª»ì˜®ê¸°ê²Œ í•˜ê¸°
                 this.gameObject.GetComponent<BoxCollider2D>().enabled = false;
                 //scale up to linear
-                defalut_obj_scale = defalut_obj_scale + 0.02f;
+                defalut_obj_scale = defalut_obj_scale + 0.025f;
                 this.gameObject.transform.localScale = new Vector3(defalut_obj_scale, defalut_obj_scale, defalut_obj_scale);
-                if (defalut_obj_scale >= 0.27) 
+                if (defalut_obj_scale >= 0.27) //ì‚¬ì´ì¦ˆ ì—…ì´ ì™„ë£Œ ë˜ì—ˆì„ ê²½ìš°.
                 {
                     is_play_first = true;
                     this.gameObject.GetComponent<BoxCollider2D>().enabled = true;
-                    this.gameObject.transform.localScale = new Vector3(0.27f, 0.27f, 0.27f);//È¤½Ã Å« ¼ö ´õÇÏ´Ù°¡ 0.27 ³ÑÀ¸¸é ¾ÈµÇ´Ï±ñ ¿©±â¼­ Àâ¾ÆÁÖ±â
+                    this.gameObject.transform.localScale = new Vector3(0.27f, 0.27f, 0.27f);//í˜¹ì‹œ í° ìˆ˜ ë”í•˜ë‹¤ê°€ 0.27 ë„˜ìœ¼ë©´ ì•ˆë˜ë‹ˆê¹ ì—¬ê¸°ì„œ ì¡ì•„ì£¼ê¸°
 
 
                 }
@@ -385,7 +413,7 @@ public class DragObject : MonoBehaviour
 
             if (this.gameObject.name.Contains("Clone")) 
             {
-                //Debug.Log("ÀÌ¸§¿¡ Å¬·ĞÀÌ Æ÷ÇÔµÇ¾îÀÖ½À´Ï´Ù.");
+                //Debug.Log("ì´ë¦„ì— í´ë¡ ì´ í¬í•¨ë˜ì–´ìˆìŠµë‹ˆë‹¤.");
                 string nth_number = get_tier_name_number(this.gameObject.name.Substring(0,5));
                 this.gameObject.name = this.gameObject.name.Substring(0,6) + nth_number;
             }
@@ -400,5 +428,5 @@ public class DragObject : MonoBehaviour
 
     }
 }
-// ¾îÂ÷ÇÇ °íÁ¤ÇÒ°Å´Ï±ñ »ó°ü¾ø³ª????
+// ì–´ì°¨í”¼ ê³ ì •í• ê±°ë‹ˆê¹ ìƒê´€ì—†ë‚˜????
 

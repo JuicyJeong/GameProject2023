@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using UnityEngine;
@@ -7,6 +7,7 @@ using System.Text;
 using static CSVReader;
 using TMPro;
 using System.IO;
+using UnityEngine.SceneManagement;
 
 
 public class global_check : MonoBehaviour
@@ -16,15 +17,16 @@ public class global_check : MonoBehaviour
 
     public string current_controlling_object_name;
     Text print_msg;
-    TextMeshProUGUI print_msg_TMP;
+    TextMeshProUGUI Merge_msg_Description;
 
     RaycastHit hit;
     public List<List<(float x, float y)>> Greed = new List<List<(float x, float y)>>();
     public List<List<bool>> is_Greed_full = new List<List<bool>>();
 
-    public Vector2 positionToCheck = new Vector2(-2.0f, 1.0f); // Ã¼Å©ÇÏ·Á´Â Æ÷Áö¼Ç
+    public Vector2 positionToCheck = new Vector2(-2.0f, 1.0f); // ì²´í¬í•˜ë ¤ëŠ” í¬ì§€ì…˜
 
-    // ÇöÀç ¾À¿¡ ÀÖ´Â ¸ğµç ¿ÀºêÁ§Æ®¸¦ °¡Á®¿É´Ï´Ù.
+
+    // í˜„ì¬ ì”¬ì— ìˆëŠ” ëª¨ë“  ì˜¤ë¸Œì íŠ¸ë¥¼ ê°€ì ¸ì˜µë‹ˆë‹¤.
     GameObject[] allObjects;
 
     void Greed_Initialize() // play only once
@@ -32,22 +34,21 @@ public class global_check : MonoBehaviour
         float start_x, start_y, greed_distance;
         //start_x = -6.0f; start_y = 5.0f; greed_distance = 2.0f;
         start_x = -5.56f; start_y = 3.06f; greed_distance = 1.86f;
-
-        // °¢ Çà¿¡ ´ëÇÑ ¸®½ºÆ®¸¦ »ı¼ºÇÏ°í ÃÊ±âÈ­
+        // ê° í–‰ì— ëŒ€í•œ ë¦¬ìŠ¤íŠ¸ë¥¼ ìƒì„±í•˜ê³  ì´ˆê¸°í™”
         for (int row_num = 0; row_num < 7; row_num++)
         {
             List<(float x, float y)> row = new List<(float x, float y)>();
             for (int col_num = 0; col_num < 8; col_num++)
             {
-                // ¿øÇÏ´Â ÁÂÇ¥ (x, y)¸¦ ÇÒ´ç
-                //row.Add((i, j)); // ¿¹¸¦ µé¾î, °¢ ¿ø¼Ò´Â (i, j) ÁÂÇ¥¸¦ °¡Áü
+                // ì›í•˜ëŠ” ì¢Œí‘œ (x, y)ë¥¼ í• ë‹¹
+                //row.Add((i, j)); // ì˜ˆë¥¼ ë“¤ì–´, ê° ì›ì†ŒëŠ” (i, j) ì¢Œí‘œë¥¼ ê°€ì§
                 row.Add((start_x + (row_num * greed_distance), start_y - (col_num * greed_distance)));
             }
             Greed.Add(row);
         }
 
 
-        //°¢ ÇàÀÇ ÀÚ¸®¿¡ ¿ÀºêÁ§Æ®°¡ ÀÖ´ÂÁö ¾ø´ÂÁö Ã¼Å©. ÀÏºÎ·¯ ¹İº¹¹® ºĞ¸®ÇØ¼­ ÀĞ±â ½±°Ô ÇÔ
+        //ê° í–‰ì˜ ìë¦¬ì— ì˜¤ë¸Œì íŠ¸ê°€ ìˆëŠ”ì§€ ì—†ëŠ”ì§€ ì²´í¬. ì¼ë¶€ëŸ¬ ë°˜ë³µë¬¸ ë¶„ë¦¬í•´ì„œ ì½ê¸° ì‰½ê²Œ í•¨
         for (int row_num = 0; row_num < 7; row_num++)
         {
             List<bool> innerList = new List<bool>();
@@ -57,7 +58,7 @@ public class global_check : MonoBehaviour
             }
             is_Greed_full.Add(innerList);
         }
-        ////false·Î ÃÊ±âÈ­ ÇÏ°í Ã¼Å©ÇÏ´Â ±¸°£. Æò¼Ò¿£ ¾È¾¹´Ï´Ù.
+        ////falseë¡œ ì´ˆê¸°í™” í•˜ê³  ì²´í¬í•˜ëŠ” êµ¬ê°„. í‰ì†Œì—” ì•ˆì”ë‹ˆë‹¤.
         //for (int i = 0; i < is_Greed_Empty.Count; i++)
         //{
         //    for (int j = 0; j < is_Greed_Empty[i].Count; j++)
@@ -70,13 +71,13 @@ public class global_check : MonoBehaviour
 
     void check_cell_is_empty()
     {
-        //¸Å¹ø ¼¿ÀÇ À§Ä¡¸¦ ¾÷µ¥ÀÌÆ®
+        //ë§¤ë²ˆ ì…€ì˜ ìœ„ì¹˜ë¥¼ ì—…ë°ì´íŠ¸
         for (int row_num = 0; row_num < 7; row_num++)
         {
             List<bool> innerList = new List<bool>();
             for (int col_num = 0; col_num < 8; col_num++)
             {
-                //Ã¼Å©ÇÒ ¼¿À» »õ·Î ÃÊ±âÈ­ÇÏ¿© ÀÔ·Â
+                //ì²´í¬í•  ì…€ì„ ìƒˆë¡œ ì´ˆê¸°í™”í•˜ì—¬ ì…ë ¥
                 Vector2 current_check_cell = new Vector2(Greed[row_num][col_num].x, Greed[row_num][col_num].y);
 
                 positionToCheck = current_check_cell;
@@ -98,30 +99,26 @@ public class global_check : MonoBehaviour
 
 
     }
-    public void SaveCSV()
+    //í•´ë‹¹ í•¨ìˆ˜ ë‹¤ë¥¸ ë””ë¹„ ì½ì„ ë•Œì—ë„ ì‚¬ìš© ê°€ëŠ¥í• ë“¯....
+    string Print_Selected_Object_Description(List<Dictionary<string, object>> object_description_csv, string print_category, string print_tier) 
     {
-        string filePath = Application.dataPath + "/Table.csv";
-        StreamWriter outStream = System.IO.File.CreateText(filePath);
 
-        int rowCount = is_Greed_full.Count;
-        int colCount = is_Greed_full[0].Count;
-
-        for (int i = 0; i < colCount; i++)
+        string final_description = "";
+        for (int row = 0; row < object_description_csv.Count; row++)
         {
-            string line = "";
-            for (int j = 0; j < rowCount; j++)
+            string check_category = object_description_csv[row]["Category"].ToString();
+            string check_tier = object_description_csv[row]["tier"].ToString();
+            
+            if (check_category == print_category && check_tier == print_tier)
             {
-                line += is_Greed_full[j][i];
-                if (j < rowCount - 1)
-                {
-                    line += ",";
-                }
+                //Debug.LogFormat("í•´ë‹¹ ìŠ¤í¬ë¦½íŠ¸ì˜ ë‚´ìš©ì„ ì¶œë ¥í•©ë‹ˆë‹¤: {0}", object_description_csv[row]["Script"]);
+                final_description = object_description_csv[row]["Script"].ToString();
+                //Debug.LogFormat(final_description);
             }
-            outStream.WriteLine(line);
         }
-
-        outStream.Close();
+        return final_description;
     }
+    //
 
 
     // Start is called before the first frame update
@@ -131,13 +128,16 @@ public class global_check : MonoBehaviour
         current_controlling_object_name = "initial_text";
         //print_msg = GameObject.Find("print_msg1").GetComponent<Text>();
 
-        print_msg_TMP = GameObject.Find("print_msg2").GetComponent<TextMeshProUGUI>();
-        allObjects = FindObjectsOfType<GameObject>(); // ¾À¿¡ ÀÖ´Â ¸ğµç ¿ÀºêÁ§Æ®¸¦ ÀúÀåÇÔ
-        Greed_Initialize(); // ±×¸®µåÀÇ 8*7 Çà·Ä¿¡¼­ °¢°¢ÀÇ ¼¿ Æ÷Áö¼ÇÀ» ¼±¾ğÇÏ°í ±× ¼¿¸¶´Ù ÇÒ´çµÈ ¿ÀºêÁ§Æ®¸¦ false·Î ÃÊ±âÈ­
+        Merge_msg_Description = GameObject.Find("MSG_Description").GetComponent<TextMeshProUGUI>();
+        Merge_msg_Description.text = current_controlling_object_name;
+        allObjects = FindObjectsOfType<GameObject>(); // ì”¬ì— ìˆëŠ” ëª¨ë“  ì˜¤ë¸Œì íŠ¸ë¥¼ ì €ì¥í•¨
+        Greed_Initialize(); // ê·¸ë¦¬ë“œì˜ 8*7 í–‰ë ¬ì—ì„œ ê°ê°ì˜ ì…€ í¬ì§€ì…˜ì„ ì„ ì–¸í•˜ê³  ê·¸ ì…€ë§ˆë‹¤ í• ë‹¹ëœ ì˜¤ë¸Œì íŠ¸ë¥¼ falseë¡œ ì´ˆê¸°í™”
+        //List<Dictionary<string, object>> object_description_csv = CSVReader.Read("DataBase/test1");
 
-        List<Dictionary<string, object>> test_csv = CSVReader.Read("Script/test");
-        string test1 = test_csv[3].ToString();
-        Debug.Log(test1);
+
+        //string test1 = test_csv[].ToString();
+
+
     }
 
 
@@ -145,9 +145,15 @@ public class global_check : MonoBehaviour
     void Update()
     {
         timer += Time.deltaTime;
-        //print_msg.text = "ÇöÀç ÄÁÆ®·ÑÁßÀÎ ¿ÀºêÁ§Æ®:" + current_controlling_object_name;
-        //print_msg_TMP.text = "ÇöÀç ÄÁÆ®·ÑÁßÀÎ ¿ÀºêÁ§Æ®:" + current_controlling_object_name;
-        print_msg_TMP.text = current_controlling_object_name + " ¿ÀºêÁ§Æ®¿¡ ´ëÇÑ ¼³¸íÀ» ÀÛ¼ºÇÕ´Ï´Ù.";
+
+
+        //Merge_msg_Description.text = current_controlling_object_name + " ì˜¤ë¸Œì íŠ¸ì— ëŒ€í•œ ì„¤ëª…ì„ ì‘ì„±í•©ë‹ˆë‹¤.ì˜¤ë¸Œì íŠ¸ì— ëŒ€í•œ ì„¤ëª…ì„ ì‘ì„±í•©ë‹ˆë‹¤.ì˜¤ë¸Œì íŠ¸ì— ëŒ€í•œ ì„¤ëª…ì„ ì‘ì„±í•©ë‹ˆë‹¤.ì˜¤ë¸Œì íŠ¸ì— ëŒ€í•œ ì„¤ëª…ì„ ì‘ì„±í•©ë‹ˆë‹¤.ì˜¤ë¸Œì íŠ¸ì— ëŒ€í•œ ì„¤ëª…ì„ ì‘ì„±í•©ë‹ˆë‹¤.ì˜¤ë¸Œì íŠ¸ì— ëŒ€í•œ ì„¤ëª…ì„ ì‘ì„±í•©ë‹ˆë‹¤.";
+        string current_category = current_controlling_object_name.Substring(0,2);
+        string current_tier = current_controlling_object_name.Substring(3, 2);
+        List<Dictionary<string, object>> object_description_csv = CSVReader.Read("DataBase/Object_description");
+
+        string print_obj_msg = Print_Selected_Object_Description(object_description_csv, current_category, current_tier);
+        Merge_msg_Description.text = print_obj_msg;
 
 
         check_cell_is_empty();
@@ -160,19 +166,18 @@ public class global_check : MonoBehaviour
 
             if (Input.GetKey(KeyCode.C))
             {
-                Debug.Log("ÇöÀç ¿ÀºêÁ§Æ®°¡ ÀÖ´Â ¼¿Àº ´ÙÀ½°ú °°½À´Ï´Ù.");
-                SaveCSV();
+                Debug.Log("í˜„ì¬ ì˜¤ë¸Œì íŠ¸ê°€ ìˆëŠ” ì…€ì€ ë‹¤ìŒê³¼ ê°™ìŠµë‹ˆë‹¤.");
                 for (int row_num = 0; row_num < 7; row_num++)
                 {
                     for (int col_num = 0; col_num < 8; col_num++)
                     {
                         if (is_Greed_full[row_num][col_num])
                         {
-                            Debug.LogFormat("{0},{1} ¼¿¿¡´Â ¿ÀºêÁ§Æ®°¡ ÀÖ½À´Ï´Ù.", row_num, col_num);
+                            Debug.LogFormat("{0},{1} ì…€ì—ëŠ” ì˜¤ë¸Œì íŠ¸ê°€ ìˆìŠµë‹ˆë‹¤.", row_num, col_num);
                         }
                     }
                 }
-                //Debug.LogFormat("ÇöÀç ÀÖ´Â ¿ÀºêÁ§Æ® ¼ö: {0}", allObjects.Length);
+                //Debug.LogFormat("í˜„ì¬ ìˆëŠ” ì˜¤ë¸Œì íŠ¸ ìˆ˜: {0}", allObjects.Length);
             }
 
             timer = 0;

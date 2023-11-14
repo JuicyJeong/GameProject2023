@@ -1,7 +1,12 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static CSVReader;
+using System.IO;
+using System;
+
+
 
 public class Scene_change : MonoBehaviour
 {
@@ -13,8 +18,57 @@ public class Scene_change : MonoBehaviour
     bool mouseButtonPressed = false;
     bool is_cursor_on = false;
     string when_pressed_obj, when_realesed_obj;
+    string scene_name;
+
+
+
+    GameObject[] allObjects;
 
     //////////////////////////////VAR//////////////////////////////
+
+
+
+    public void SaveCSV_MergeBoard()
+    {
+        //string filePath = "Assets/Resources/SaveData/MergeTableData.csv";
+        string filePath = Application.persistentDataPath + "/MergeTableData.csv";
+
+        StreamWriter outStream = System.IO.File.CreateText(filePath);
+
+        int obj_no = 0;
+        string CSV_HEAD = "No,ObjectName,PosX,PosY";
+
+        DateTime currentTime = DateTime.Now;
+        string formattedTime = currentTime.ToString("yyyy-MM-dd-HH-mm-ss");
+
+        outStream.WriteLine(CSV_HEAD);
+        //outStream.WriteLine(formattedTime);
+
+        allObjects = FindObjectsOfType<GameObject>(); // ì”¬ì— ìˆëŠ” ëª¨ë“  ì˜¤ë¸Œì íŠ¸ë¥¼ ì €ì¥í•¨
+        foreach (GameObject obj in allObjects) 
+        {
+            string obj_name = obj.ToString();
+            if (obj_name.Contains("c1") || obj_name.Contains("c2") ||
+                obj_name.Contains("c3") || obj_name.Contains("c4") ||
+                obj_name.Contains("c5") || obj_name.Contains("c6") ||
+                obj_name.Contains("c7")) 
+            {
+                if (!obj_name.Contains("t0")) 
+                {
+                    string obj_Xpos = obj.transform.position.x.ToString();
+                    string obj_Ypos = obj.transform.position.y.ToString();
+
+                    string add_line = obj_no.ToString() +
+                        ";" + obj_name.Substring(0,7) + ";" + obj_Xpos + ";" + obj_Ypos;
+                    //Debug.Log("ì¶”ê°€í•  ë¼ì¸ ë‚´ìš©:\n" + add_line);
+                    outStream.WriteLine(add_line);
+
+                    obj_no++;
+                }
+            }
+        }
+            outStream.Close();
+    }
 
     private void OnMouseDown()
     {
@@ -25,13 +79,19 @@ public class Scene_change : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.down, 1.0f);
         if (hit.collider == null)
         {
-            //Debug.LogFormat("°¨ÁöµÈ ¹öÆ°ÀÌ ¾ø½À´Ï´Ù.");
+            //Debug.LogFormat("ê°ì§€ëœ ë²„íŠ¼ì´ ì—†ìŠµë‹ˆë‹¤.");
             when_pressed_obj = "";
         }
         else 
         {
             when_pressed_obj = hit.collider.name;
-            //Debug.LogFormat("¸¶¿ì½º°¡ ´­·ÈÀ» ¶§ÀÇ Å¬¸¯µÈ ¿ÀºêÁ§Æ®:{0}", when_pressed_obj);
+            //Debug.LogFormat("ë§ˆìš°ìŠ¤ê°€ ëˆŒë ¸ì„ ë•Œì˜ í´ë¦­ëœ ì˜¤ë¸Œì íŠ¸:{0}", when_pressed_obj);
+            if (scene_name == "MergeBoard") 
+            {
+                Debug.LogFormat("í´ë¦­ ê°ì§€. ì”¬ ë°ì´í„° ì €ì¥.");
+                SaveCSV_MergeBoard();
+            }
+
         }
  
 
@@ -55,13 +115,13 @@ public class Scene_change : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(mousePosition, Vector2.down, 1.0f);
         if (hit.collider == null)
         {
-            //Debug.LogFormat("°¨ÁöµÈ ¹öÆ°ÀÌ ¾ø½À´Ï´Ù.");
+            //Debug.LogFormat("ê°ì§€ëœ ë²„íŠ¼ì´ ì—†ìŠµë‹ˆë‹¤.");
             when_realesed_obj = "";
         }
         else
         {
             when_realesed_obj = hit.collider.name;
-            //Debug.LogFormat("¸¶¿ì½º°¡ ´­·ÈÀ» ¶§ÀÇ Å¬¸¯µÈ ¿ÀºêÁ§Æ®:{0}", when_realesed_obj);
+            //Debug.LogFormat("ë§ˆìš°ìŠ¤ê°€ ëˆŒë ¸ì„ ë•Œì˜ í´ë¦­ëœ ì˜¤ë¸Œì íŠ¸:{0}", when_realesed_obj);
         }
 
     }
@@ -76,53 +136,56 @@ public class Scene_change : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        Scene scene = SceneManager.GetActiveScene(); //í•¨ìˆ˜ ì•ˆì— ì„ ì–¸í•˜ì—¬ ì‚¬ìš©í•œë‹¤.
+        scene_name = scene.name;
+
         if (when_pressed_obj == when_realesed_obj) 
         {
-            //////////////////////////////¸ÓÁöº¸µå////////////////////////////////////////
-            if (when_pressed_obj == "MergeBoard_left_btn" && when_realesed_obj == "MergeBoard_left_btn")
+            //////////////////////////////ë¨¸ì§€ë³´ë“œ////////////////////////////////////////
+            if (when_pressed_obj == "Merge_icon_Arrow_Left" && when_realesed_obj == "Merge_icon_Arrow_Left")
             {
-                Debug.Log("¿ŞÂÊ¹öÆ°À» Å¬¸¯Çß½À´Ï´Ù. Äù½ºÆ®Ã¢À» ¶ç¿ó´Ï´Ù.");
+                Debug.Log("ì™¼ìª½ë²„íŠ¼ì„ í´ë¦­í–ˆìŠµë‹ˆë‹¤. í€˜ìŠ¤íŠ¸ì°½ì„ ë„ì›ë‹ˆë‹¤.");
             }
-            if (when_pressed_obj == "MergeBoard_center_btn" && when_realesed_obj == "MergeBoard_center_btn") 
+            if (when_pressed_obj == "Merge_item_Box" && when_realesed_obj == "Merge_item_Box") 
             {
-                Debug.Log("¹Ú½º¹öÆ°À» Å¬¸¯Çß½À´Ï´Ù. ¾î¼Àºí¸®¾ÀÀ¸·Î ÀÌµ¿ÇÕ´Ï´Ù.");
+                Debug.Log("ë°•ìŠ¤ë²„íŠ¼ì„ í´ë¦­í–ˆìŠµë‹ˆë‹¤. ì–´ì…ˆë¸”ë¦¬ì”¬ìœ¼ë¡œ ì´ë™í•©ë‹ˆë‹¤.");
                 SceneManager.LoadScene("Assembly");
             }
-            if (when_pressed_obj == "MergeBoard_right_btn" && when_realesed_obj == "MergeBoard_right_btn")
+            if (when_pressed_obj == "Merge_icon_Arrow_Right" && when_realesed_obj == "Merge_icon_Arrow_Right")
             {
-                Debug.Log("¿À¸¥ÂÊ¹öÆ°À» Å¬¸¯Çß½À´Ï´Ù. Ä«¿îÅÍ·Î ÀÌµ¿ÇÕ´Ï´Ù.");
+                Debug.Log("ì˜¤ë¥¸ìª½ë²„íŠ¼ì„ í´ë¦­í–ˆìŠµë‹ˆë‹¤. ì¹´ìš´í„°ë¡œ ì´ë™í•©ë‹ˆë‹¤.");
                 SceneManager.LoadScene("Counter");
             }
 
-            //////////////////////////////¾î¼Àºí¸®////////////////////////////////////////
-            if (when_pressed_obj == "Assembly_left_btn" && when_realesed_obj == "Assembly_left_btn")
+            //////////////////////////////ì–´ì…ˆë¸”ë¦¬////////////////////////////////////////
+            if (when_pressed_obj == "Assembly_icon_Arrow_Left" && when_realesed_obj == "Assembly_icon_Arrow_Left")
             {
-                Debug.Log("¿ŞÂÊ¹öÆ°À» Å¬¸¯Çß½À´Ï´Ù. Äù½ºÆ®Ã¢À» ¶ç¿ó´Ï´Ù.");
+                Debug.Log("ì™¼ìª½ë²„íŠ¼ì„ í´ë¦­í–ˆìŠµë‹ˆë‹¤. í€˜ìŠ¤íŠ¸ì°½ì„ ë„ì›ë‹ˆë‹¤.");
             }
-            if (when_pressed_obj == "Assembly_center_btn" && when_realesed_obj == "Assembly_center_btn")
+            if (when_pressed_obj == "Assembly_item_Box" && when_realesed_obj == "Assembly_item_Box")
             {
-                Debug.Log("¹Ú½º¹öÆ°À» Å¬¸¯Çß½À´Ï´Ù. ¸ÓÁöº¸µå¾ÀÀ¸·Î ÀÌµ¿ÇÕ´Ï´Ù.");
+                Debug.Log("ë°•ìŠ¤ë²„íŠ¼ì„ í´ë¦­í–ˆìŠµë‹ˆë‹¤. ë¨¸ì§€ë³´ë“œì”¬ìœ¼ë¡œ ì´ë™í•©ë‹ˆë‹¤.");
                 SceneManager.LoadScene("MergeBoard");
             }
-            if (when_pressed_obj == "Assembly_right_btn" && when_realesed_obj == "Assembly_right_btn")
+            if (when_pressed_obj == "Assembly_icon_Arrow_Right" && when_realesed_obj == "Assembly_icon_Arrow_Right")
             {
-                Debug.Log("¿À¸¥ÂÊ¹öÆ°À» Å¬¸¯Çß½À´Ï´Ù. Ä«¿îÅÍ·Î ÀÌµ¿ÇÕ´Ï´Ù.");
+                Debug.Log("ì˜¤ë¥¸ìª½ë²„íŠ¼ì„ í´ë¦­í–ˆìŠµë‹ˆë‹¤. ì¹´ìš´í„°ë¡œ ì´ë™í•©ë‹ˆë‹¤.");
                 SceneManager.LoadScene("Counter");
             }
 
-            //////////////////////////////Ä«¿îÅÍ////////////////////////////////////////
-            if (when_pressed_obj == "Counter_left_btn" && when_realesed_obj == "Counter_left_btn")
+            //////////////////////////////ì¹´ìš´í„°////////////////////////////////////////
+            if (when_pressed_obj == "Counter_icon_Arrow_Left" && when_realesed_obj == "Counter_icon_Arrow_Left")
             {
-                Debug.Log("¿ŞÂÊ¹öÆ°À» Å¬¸¯Çß½À´Ï´Ù. Äù½ºÆ®Ã¢À» ¶ç¿ó´Ï´Ù.");
+                Debug.Log("ì™¼ìª½ë²„íŠ¼ì„ í´ë¦­í–ˆìŠµë‹ˆë‹¤. í€˜ìŠ¤íŠ¸ì°½ì„ ë„ì›ë‹ˆë‹¤.");
             }
-            if (when_pressed_obj == "Counter_center_btn" && when_realesed_obj == "Counter_center_btn")
+            if (when_pressed_obj == "Counter_item_Box" && when_realesed_obj == "Counter_item_Box")
             {
-                Debug.Log("¹Ú½º¹öÆ°À» Å¬¸¯Çß½À´Ï´Ù. ¾î¼Àºí¸®¾ÀÀ¸·Î ÀÌµ¿ÇÕ´Ï´Ù.");
+                Debug.Log("ë°•ìŠ¤ë²„íŠ¼ì„ í´ë¦­í–ˆìŠµë‹ˆë‹¤. ì–´ì…ˆë¸”ë¦¬ì”¬ìœ¼ë¡œ ì´ë™í•©ë‹ˆë‹¤.");
                 SceneManager.LoadScene("Assembly");
             }
-            if (when_pressed_obj == "Counter_right_btn" && when_realesed_obj == "Counter_right_btn")
+            if (when_pressed_obj == "Counter_icon_Arrow_Right" && when_realesed_obj == "Counter_icon_Arrow_Right")
             {
-                Debug.Log("¿À¸¥ÂÊ¹öÆ°À» Å¬¸¯Çß½À´Ï´Ù. ¸ÓÁöº¸µå·Î ÀÌµ¿ÇÕ´Ï´Ù.");
+                Debug.Log("ì˜¤ë¥¸ìª½ë²„íŠ¼ì„ í´ë¦­í–ˆìŠµë‹ˆë‹¤. ë¨¸ì§€ë³´ë“œë¡œ ì´ë™í•©ë‹ˆë‹¤.");
                 SceneManager.LoadScene("MergeBoard");
             }
 
