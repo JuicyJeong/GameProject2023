@@ -99,7 +99,7 @@ public class global_check : MonoBehaviour
 
 
     }
-    //해당 함수 다른 디비 읽을 때에도 사용 가능할듯....
+    //해당 함수 다른 디비 
     string Print_Selected_Object_Description(List<Dictionary<string, object>> object_description_csv, string print_category, string print_tier) 
     {
 
@@ -132,10 +132,6 @@ public class global_check : MonoBehaviour
         Merge_msg_Description.text = current_controlling_object_name;
         allObjects = FindObjectsOfType<GameObject>(); // 씬에 있는 모든 오브젝트를 저장함
         Greed_Initialize(); // 그리드의 8*7 행렬에서 각각의 셀 포지션을 선언하고 그 셀마다 할당된 오브젝트를 false로 초기화
-        //List<Dictionary<string, object>> object_description_csv = CSVReader.Read("DataBase/test1");
-
-
-        //string test1 = test_csv[].ToString();
 
 
     }

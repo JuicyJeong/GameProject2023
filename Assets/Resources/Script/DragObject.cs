@@ -6,6 +6,16 @@ using System;
 using System.Text;
 using TMPro;
 
+/*
+ 해당 스크립트는 머지보드의 오브젝트들(CPU,GPU, 파워,SSD...)에 적용되는 스크립트입니다.
+주요 기능은 다음과 같습니다.
+0. 머지 보드의 격자 좌표 초기화 & 선언
+1. 오브젝트 드래그 앤 드롭 기능 
+2-1. 드래그 앤 드롭 시, 비어있는 가장 가까운 격자로 이동 
+2-2. 동일한 카테고리-티어끼리 충돌한채로 드롭 되었을 때, 머지 기능 작동
+2-3. 어셈블리 박스로 이동할 경우, 오브젝트가 사라짐(이제 어셈블리 저장데이터에 올려야함)
+3. 입력된 현재 카테고리와 티어를 입력하면 그 카테고리와 티어 중 비어있는 n번째 파일 이름을 벹어냄
+ */
 public class DragObject : MonoBehaviour
 {
     string object_name;
@@ -21,7 +31,7 @@ public class DragObject : MonoBehaviour
     bool is_collision_box = false;
     public Text print_msg1;
 
-    float defalut_obj_scale = 0.27f;
+    float defalut_obj_scale = 0.35f;
 
     float timer;
     float waitingTime = 0.0166667f;
@@ -51,7 +61,7 @@ public class DragObject : MonoBehaviour
     {
         float start_x, start_y, greed_distance;
         //start_x = -6.0f; start_y = 5.0f; greed_distance = 2.0f;
-        start_x = -5.56f; start_y = 3.06f; greed_distance = 1.86f;
+        start_x = -5.56f; start_y = 3.06f; greed_distance = 1.86f; // 격자의 포지션 정의.
 
         // 각 행에 대한 리스트를 생성하고 초기화
         for (int row_num = 0; row_num < 7; row_num++)
@@ -154,14 +164,14 @@ public class DragObject : MonoBehaviour
 
                 if (defalut_obj_scale > 0.01)
                 {
-                    defalut_obj_scale = defalut_obj_scale - 0.025f;//  함수그래프로 크게 팝업 사이즈 나중에 조절해야함.
+                    defalut_obj_scale = defalut_obj_scale - 0.03f;//  함수그래프로 크게 팝업 사이즈 나중에 조절해야함.
                     this_obj.transform.localScale = new Vector3(defalut_obj_scale, defalut_obj_scale, 1);
                     coll_obj.transform.localScale = new Vector3(defalut_obj_scale, defalut_obj_scale, 1);
 
                 }
                 if (defalut_obj_scale < 0.01) 
                 {
-                    defalut_obj_scale = 0.27f;
+                    defalut_obj_scale = 0.35f;
 
                     Destroy(coll_obj);
                     Destroy(this_obj);
@@ -173,7 +183,7 @@ public class DragObject : MonoBehaviour
     }
     //처음 로드될 때의 나타나는 방식을 표현...
 
-    public Vector3 find_empty_short_distance_cell(Vector3 obj_position) 
+    public Vector3 find_empty_short_distance_cell(Vector3 obj_position) //빈 셀이 아닐 때 가장 가까운 빈셀을 찾아서 이동. 스냅이랑 유사.
     {
         List<List<bool>> is_Greed_full = GameObject.Find("dummy1").GetComponent<global_check>().is_Greed_full;
         List<(int row, int column)> empty_cell_list = new List<(int row, int column)>();
@@ -363,9 +373,6 @@ public class DragObject : MonoBehaviour
     void Start()
     {
 
-        //print_msg1 = GameObject.Find("print_msg1").GetComponent<Text>();
-        //print_msg1.text = "init message";
-
         Greed_Initialize();
         thisobj = this.gameObject;
 
@@ -397,13 +404,13 @@ public class DragObject : MonoBehaviour
                 //컬라이더 꺼서 마우스로 못옮기게 하기
                 this.gameObject.GetComponent<BoxCollider2D>().enabled = false;
                 //scale up to linear
-                defalut_obj_scale = defalut_obj_scale + 0.025f;
+                defalut_obj_scale = defalut_obj_scale + 0.035f;
                 this.gameObject.transform.localScale = new Vector3(defalut_obj_scale, defalut_obj_scale, defalut_obj_scale);
-                if (defalut_obj_scale >= 0.27) //사이즈 업이 완료 되었을 경우.
+                if (defalut_obj_scale >= 0.35) //사이즈 업이 완료 되었을 경우.
                 {
                     is_play_first = true;
                     this.gameObject.GetComponent<BoxCollider2D>().enabled = true;
-                    this.gameObject.transform.localScale = new Vector3(0.27f, 0.27f, 0.27f);//혹시 큰 수 더하다가 0.27 넘으면 안되니깐 여기서 잡아주기
+                    this.gameObject.transform.localScale = new Vector3(0.35f, 0.35f, 0.35f);//혹시 큰 수 더하다가 0.27 넘으면 안되니깐 여기서 잡아주기
 
 
                 }

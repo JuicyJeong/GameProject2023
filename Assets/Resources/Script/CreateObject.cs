@@ -45,7 +45,6 @@ public class CreateObject : MonoBehaviour
     {
         is_once_played = true;
         mouseButtonReleased = true;
-        //Debug.Log("∂√¿Ω");
 
     }
     void object_create()
